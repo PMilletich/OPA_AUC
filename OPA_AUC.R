@@ -1,8 +1,4 @@
-### Trish Milletich 
-#Flow Cytometry IC50 for Mandi and Brianna 
-
 library(ggplot2)
-#library(drc)
 library(ggpubr)
 library(DescTools)
 
@@ -31,7 +27,7 @@ OG_data$i = 1:nrow(OG_data)
 #Calculations = =(Geometric Mean*RFP+)/10000
 #Subset for the RFP + data 
 OG_data_RFP = subset(OG_data, grepl("RFP +", OG_data$Name) == T)
-current_pat = Patient_IDlist[1]
+
 #Cycle through all the subjects and average the three replicates by dilution 
 for (current_pat in Patient_IDlist) {
   pat_subset = subset(OG_data, grepl(current_pat, OG_data$Name))
@@ -66,7 +62,8 @@ for (current_pat in Patient_IDlist) {
       Metric = (Geometric_Mean*RFP)/Max_cells
       Metric_list = c(Metric_list, Metric)
     }
-    
+
+    #Find the average of the metric for the patient at this dilution factor 
     avg_Metric = ifelse(length(Metric_list) == 0, NA, mean(Metric_list, na.rm = T))
     
     current_row = data.frame("Patient" = current_pat,
@@ -75,7 +72,7 @@ for (current_pat in Patient_IDlist) {
     pat_averages = rbind(pat_averages, current_row)
     
     if (length(Metric_list) != 0) {
-      #Save raw total data to new data.frame 
+      #Save raw total data to pat_all data.frame 
       current_row = data.frame("Patient" = current_pat,
                                "Dilution" = Dilution,
                                "Metric" = Metric_list)
@@ -170,9 +167,10 @@ for (current_pat in Patient_IDlist) {
                                  "coral", "pink", "mistyrose", "blue")) + 
     theme(legend.position = "bottom"); suppressWarnings(AUC_plot)
   
-  
+  #arrange the linear and AUC plots and save as a jpeg
   Combined = ggarrange(linear_plot, AUC_plot, nrow = 2, heights = c(1,2))
   Combined = annotate_figure(Combined, current_pat)
+
   jpeg(paste("./Figures/",current_data, "_", gsub(" ", ".", current_pat), "_3.jpeg", sep = ""), 
        res = 400, height = 3500, width = 3500)
   plot(Combined)
